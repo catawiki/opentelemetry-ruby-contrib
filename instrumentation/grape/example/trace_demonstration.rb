@@ -9,14 +9,15 @@ require 'opentelemetry-sdk'
 require 'opentelemetry-instrumentation-grape'
 require 'grape'
 
-# Export traces to console by default
+# Export traces to console
 ENV['OTEL_TRACES_EXPORTER'] ||= 'console'
 
 OpenTelemetry::SDK.configure do |c|
+  c.service_name = 'trace_demonstration'
   c.use 'OpenTelemetry::Instrumentation::Grape'
 end
 
-# A basic Grape endpoint example
+# A basic Grape API example
 class ExampleAPI < Grape::API
   format :json
 
@@ -27,12 +28,8 @@ class ExampleAPI < Grape::API
 
   desc 'Return information about a user'
   # Filters
-  before do
-    sleep(0.01)
-  end
-  after do
-    sleep(0.01)
-  end
+  before { sleep(0.01) }
+  after { sleep(0.01) }
   params do
     requires :id, type: Integer, desc: 'User ID'
   end
@@ -42,9 +39,8 @@ class ExampleAPI < Grape::API
 end
 
 # Set up fake Rack application
-builder = Rack::Builder.app do
-  run ExampleAPI
-end
+builder = Rack::Builder.app { run ExampleAPI }
+app = Rack::MockRequest.new(builder)
 
-Rack::MockRequest.new(builder).get('/hello')
-Rack::MockRequest.new(builder).get('/users/1')
+app.get('/hello')
+app.get('/users/1')

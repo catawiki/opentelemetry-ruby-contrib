@@ -7,6 +7,7 @@
 module OpenTelemetry
   module Instrumentation
     module Grape
+      # Current gem version
       VERSION = '0.0.0'
     end
   end

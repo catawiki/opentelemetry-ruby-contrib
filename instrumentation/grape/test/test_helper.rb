@@ -20,3 +20,23 @@ OpenTelemetry::SDK.configure do |c|
   c.logger = Logger.new($stderr, level: ENV.fetch('OTEL_LOG_LEVEL', 'fatal').to_sym)
   c.add_span_processor span_processor
 end
+
+# Helper functions
+def uninstall_and_cleanup
+  instrumentation.instance_variable_set('@installed', false)
+  unsubscribe
+  EXPORTER.reset
+end
+
+def unsubscribe
+  subscriptions = [
+    'endpoint_run.grape',
+    'endpoint_render.grape',
+    'endpoint_run_filters.grape'
+  ]
+  subscriptions.each { |e| ActiveSupport::Notifications.unsubscribe(e) }
+end
+
+def spans_per_operation(operation)
+  spans.select { |s| s.attributes['operation'] == operation }
+end

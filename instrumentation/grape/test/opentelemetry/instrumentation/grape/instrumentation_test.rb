@@ -38,4 +38,30 @@ describe OpenTelemetry::Instrumentation::Grape do
       _(instrumentation.compatible?).must_equal true
     end
   end
+
+  describe '#config' do
+    before do
+      # Simulate a fresh install
+      uninstall_and_cleanup
+      instrumentation.install(config)
+    end
+
+    describe 'when configs are empty' do
+      let(:config) { {} }
+
+      it 'is installed with default settings when configs are empty' do
+        _(instrumentation).must_be :installed?
+        _(instrumentation.config[:ignored_events]).must_be_empty
+      end
+    end
+
+    describe 'when configs are not empty' do
+      let(:config) { { ignored_events: [:endpoint_render] } }
+
+      it 'is installed with the specified configs' do
+        _(instrumentation).must_be :installed?
+        _(instrumentation.config[:ignored_events]).must_equal [:endpoint_render]
+      end
+    end
+  end
 end

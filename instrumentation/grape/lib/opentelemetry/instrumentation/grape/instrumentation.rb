@@ -9,6 +9,7 @@ module OpenTelemetry
     module Grape
       # The Instrumentation class contains logic to detect and install the Grape instrumentation
       class Instrumentation < OpenTelemetry::Instrumentation::Base
+        # Minimum Grape version needed for compatibility with this instrumentation
         MINIMUM_VERSION = Gem::Version.new('1.2.0')
 
         install do |_config|
@@ -21,18 +22,10 @@ module OpenTelemetry
         end
 
         compatible do
-          # ActiveSupport::Notifications were introduced in Grape 0.13.0
-          # https://github.com/ruby-grape/grape/blob/master/CHANGELOG.md#0130-2015810
           gem_version >= MINIMUM_VERSION
         end
 
-        # Config options available in ddog Grape instrumentation
-        option :enabled, default: true, validate: :boolean
-        option :error_statuses, default: [], validate: :array
-        # Config options necessary for OpenTelemetry::Instrumentation::ActiveSupport.subscribe called in railtie
-        # instrumentation/active_support/lib/opentelemetry/instrumentation/active_support/span_subscriber.rb#L23
-        # Used to validate if any of the payload keys are invalid
-        option :disallowed_notification_payload_keys, default: [], validate: :array
+        option :ignored_events, default: [], validate: :array
 
         private
 
@@ -41,11 +34,13 @@ module OpenTelemetry
         end
 
         def require_dependencies
-          require_relative 'handler'
+          require_relative 'subscriber'
+          require_relative 'event_handler'
+          require_relative 'custom_subscribers/endpoint_run'
         end
 
         def subscribe
-          Handler.subscribe
+          Subscriber.subscribe
         end
       end
     end
