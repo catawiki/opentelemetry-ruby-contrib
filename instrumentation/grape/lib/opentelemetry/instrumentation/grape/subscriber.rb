@@ -24,15 +24,12 @@ module OpenTelemetry
           span = payload.delete(:__opentelemetry_span)
           token = payload.delete(:__opentelemetry_ctx_token)
 
-
           span.add_attributes(build_attributes(payload))
 
           span.set_error(payload[:exception_object]) if payload[:exception_object]
 
           span.finish
           OpenTelemetry::Context.detach(token)
-
-          puts "---- finished #{name} span with id: #{span.context.hex_span_id}"
         end
 
         def tracer

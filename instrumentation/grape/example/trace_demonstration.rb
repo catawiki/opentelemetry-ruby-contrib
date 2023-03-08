@@ -8,12 +8,14 @@ require 'opentelemetry-api'
 require 'opentelemetry-sdk'
 require 'opentelemetry-instrumentation-grape'
 require 'grape'
+require_relative 'simple_console_exporter'
 
 # Export traces to console by default
-ENV['OTEL_TRACES_EXPORTER'] ||= 'console'
+ENV['OTEL_TRACES_EXPORTER'] ||= 'none'
 
 OpenTelemetry::SDK.configure do |c|
   c.use 'OpenTelemetry::Instrumentation::Grape'
+  c.add_span_processor OpenTelemetry::SDK::Trace::Export::SimpleSpanProcessor.new(SimpleConsoleExporter.new)
 end
 
 # A basic Grape endpoint example

@@ -38,12 +38,12 @@ module OpenTelemetry
           private
 
           def endpoint_render(name, start, finish, _id, payload)
+
             attributes = {
               'component' => 'template',
               'operation' => name
             }
-            parent_context = payload[:__opentelemetry_span]&.context
-            span = tracer.start_span(name, attributes: attributes,with_parent: parent_context, start_timestamp: start, kind: :server)
+            span = tracer.start_span(name, attributes: attributes, start_timestamp: start, kind: :server)
             span.finish
           end
 
@@ -53,8 +53,7 @@ module OpenTelemetry
               'operation' => name
             }
 
-            parent_context = payload[:__opentelemetry_span]&.context
-            span = tracer.start_span(name, with_parent: parent_context, attributes: attributes, start_timestamp: start, kind: :server)
+            span = tracer.start_span(name, attributes: attributes, start_timestamp: start, kind: :server)
             span.finish
           end
 
