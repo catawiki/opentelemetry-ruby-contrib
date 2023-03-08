@@ -17,8 +17,6 @@ OpenTelemetry::SDK.configure do |c|
 end
 
 # A basic Grape endpoint example
-require 'grape'
-
 class ExampleAPI < Grape::API
   format :json
 
