@@ -17,6 +17,7 @@ describe OpenTelemetry::Instrumentation::Grape do
   let(:run_spans) { spans_per_operation('endpoint_run') }
   let(:render_spans) { spans_per_operation('endpoint_render') }
   let(:filter_spans) { spans_per_operation('endpoint_run_filters') }
+  let(:format_spans) { spans_per_operation('format_response') }
   let(:config) { {} }
 
   before do
@@ -74,6 +75,18 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       it 'does not produce a child endpoint_run_filters span' do
         _(filter_spans.length).must_equal 0
+      end
+
+      it 'produces a format_response span with the expected attributes' do
+        _(format_spans.length).must_equal 1
+
+        span = format_spans.first
+
+        _(span.name).must_equal expected_span_name
+        _(span.kind).must_equal :server
+        _(span.attributes['component']).must_equal 'template'
+        _(span.attributes['operation']).must_equal 'format_response'
+        _(span.attributes['grape.formatter.type']).must_equal 'json'
       end
     end
 
@@ -343,6 +356,50 @@ describe OpenTelemetry::Instrumentation::Grape do
 
         _(span.name).must_equal expected_span_name
         _(span.status.code).must_equal OpenTelemetry::Trace::Status::ERROR
+      end
+    end
+
+    describe 'when an API endpoint raises an error when formatting the response' do
+      class ErrorInFormatterAPI < Grape::API
+        format :xml
+        get :bad_format do
+          'Not OK'
+        end
+      end
+
+      let(:app) { ErrorInFormatterAPI }
+      let(:request_path) { '/bad_format' }
+      let(:expected_span_name) { 'ErrorInFormatterAPI GET /bad_format' }
+      let(:expected_error_type) { 'Grape::Exceptions::InvalidFormatter' }
+
+      before { get request_path }
+
+      it 'sets format_response span status to error' do
+        _(format_spans.size).must_equal 1
+
+        span = format_spans.first
+
+        _(span.name).must_equal expected_span_name
+        _(span.status.code).must_equal OpenTelemetry::Trace::Status::ERROR
+        _(span.status.description).must_equal "Unhandled exception of type: #{expected_error_type}"
+      end
+
+      it 'records the exception in format_response spans' do
+        span = format_spans.first
+
+        _(span.events.first.name).must_equal 'exception'
+        _(span.events.first.attributes['exception.type']).must_equal expected_error_type
+        _(span.events.first.attributes['exception.message']).must_equal 'cannot convert String to xml'
+      end
+
+      it 'produces spans for endpoint_run and endpoint_render without errors despite the exception in formatter' do
+        _(run_spans.size).must_equal 1
+        _(render_spans.size).must_equal 1
+
+        (run_spans + render_spans).each do |span|
+          _(span.name).must_equal expected_span_name
+          _(span.status.code).must_equal OpenTelemetry::Trace::Status::UNSET
+        end
       end
     end
 

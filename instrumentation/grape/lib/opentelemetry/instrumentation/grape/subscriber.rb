@@ -20,7 +20,8 @@ module OpenTelemetry
 
           SUBSCRIPTIONS = {
             endpoint_render: 'endpoint_render.grape',
-            endpoint_run_filters: 'endpoint_run_filters.grape'
+            endpoint_run_filters: 'endpoint_run_filters.grape',
+            format_response: 'format_response.grape'
           }.freeze
 
           CUSTOM_SUBSCRIPTIONS = {

@@ -32,7 +32,8 @@ def unsubscribe
   subscriptions = [
     'endpoint_run.grape',
     'endpoint_render.grape',
-    'endpoint_run_filters.grape'
+    'endpoint_run_filters.grape',
+    'format_response.grape'
   ]
   subscriptions.each { |e| ActiveSupport::Notifications.unsubscribe(e) }
 end

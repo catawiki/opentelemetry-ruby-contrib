@@ -67,6 +67,20 @@ module OpenTelemetry
             end
           end
 
+          # Handles the format_response.grape event
+          def format_response(_name, start, _finish, _id, payload)
+            endpoint = payload[:env]['api.endpoint']
+            name = span_name(endpoint)
+            attributes = {
+              'component' => 'template',
+              'operation' => 'format_response',
+              'grape.formatter.type' => formatter_type(payload[:formatter])
+            }
+            tracer.in_span(name, attributes: attributes, start_timestamp: start, kind: :server) do |span|
+              handle_error(span, payload[:exception_object]) if payload[:exception_object]
+            end
+          end
+
           private
 
           def tracer
@@ -94,7 +108,7 @@ module OpenTelemetry
           def handle_error(span, exception)
             span.record_exception(exception)
             span.status = OpenTelemetry::Trace::Status.error("Unhandled exception of type: #{exception.class}")
-            return unless exception.respond_to?('status')
+            return unless exception.respond_to?('status') && exception.status
 
             span.set_attribute(OpenTelemetry::SemanticConventions::Trace::HTTP_STATUS_CODE, exception.status)
           end
@@ -113,6 +127,12 @@ module OpenTelemetry
             prefix = endpoint.routes.first.options[:prefix].to_s || ''
             parts = [prefix, version] + namespace.split('/') + endpoint.options[:path]
             parts.reject { |p| p.blank? || p.eql?('/') }.join('/').prepend('/')
+          end
+
+          def formatter_type(formatter)
+            basename = formatter.name.split('::').last
+            # Convert from CamelCase to snake_case
+            basename.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase
           end
         end
       end

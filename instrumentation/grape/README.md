@@ -9,6 +9,7 @@ It currently supports the following events:
 - `endpoint_run.grape`
 - `endpoint_render.grape`
 - `endpoint_run_filters.grape`
+- `format_response.grape`
 
 ## How do I get started?
 
