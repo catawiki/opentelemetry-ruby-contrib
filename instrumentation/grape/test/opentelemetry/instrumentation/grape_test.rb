@@ -37,7 +37,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { BasicAPI }
       let(:request_path) { '/hello' }
-      let(:expected_span_name) { 'BasicAPI GET /hello' }
+      let(:expected_span_name) { 'GET /hello' }
 
       before { get request_path }
 
@@ -103,7 +103,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { RouteParamAPI }
       let(:request_path) { '/users/1' }
-      let(:expected_span_name) { 'RouteParamAPI GET /users/:id' }
+      let(:expected_span_name) { 'GET /users/:id' }
       let(:expected_path) { '/users/:id' }
 
       before { get request_path }
@@ -128,7 +128,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { VersionedWithPrefixAPI }
       let(:request_path) { '/api/v1/hello' }
-      let(:expected_span_name) { 'VersionedWithPrefixAPI GET /api/v1/hello' }
+      let(:expected_span_name) { 'GET /api/v1/hello' }
       let(:expected_path) { '/api/v1/hello' }
 
       before { get request_path }
@@ -156,7 +156,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { NestedAPI }
       let(:request_path) { '/internal/users' }
-      let(:expected_span_name) { 'NestedAPI GET /internal/users' }
+      let(:expected_span_name) { 'GET /internal/users' }
       let(:expected_path) { '/internal/users' }
 
       before { get request_path }
@@ -181,7 +181,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { FilteredAPI }
       let(:request_path) { '/filtered' }
-      let(:expected_span_name) { 'FilteredAPI GET /filtered' }
+      let(:expected_span_name) { 'GET /filtered' }
 
       before { get request_path }
 
@@ -239,7 +239,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { ValidationErrorAPI }
       let(:request_path) { '/new' }
-      let(:expected_span_name) { 'ValidationErrorAPI POST /new' }
+      let(:expected_span_name) { 'POST /new' }
       let(:headers) { { 'Content-Type' => 'application/json' } }
       let(:expected_error_type) { 'Grape::Exceptions::ValidationErrors' }
 
@@ -279,7 +279,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { RaisedErrorAPI }
       let(:request_path) { '/failure' }
-      let(:expected_span_name) { 'RaisedErrorAPI GET /failure' }
+      let(:expected_span_name) { 'GET /failure' }
       let(:expected_error_type) { 'StandardError' }
 
       before do
@@ -326,7 +326,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { ErrorInFilterAPI }
       let(:request_path) { '/filtered' }
-      let(:expected_span_name) { 'ErrorInFilterAPI GET /filtered' }
+      let(:expected_span_name) { 'GET /filtered' }
       let(:expected_error_type) { 'StandardError' }
 
       before do
@@ -369,7 +369,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { ErrorInFormatterAPI }
       let(:request_path) { '/bad_format' }
-      let(:expected_span_name) { 'ErrorInFormatterAPI GET /bad_format' }
+      let(:expected_span_name) { 'GET /bad_format' }
       let(:expected_error_type) { 'Grape::Exceptions::InvalidFormatter' }
 
       before { get request_path }
@@ -412,7 +412,7 @@ describe OpenTelemetry::Instrumentation::Grape do
 
       let(:app) { ErrorResponseAPI }
       let(:request_path) { '/error_response' }
-      let(:expected_span_name) { 'ErrorResponseAPI GET /error_response' }
+      let(:expected_span_name) { 'GET /error_response' }
 
       before { get request_path }
 
@@ -440,7 +440,7 @@ describe OpenTelemetry::Instrumentation::Grape do
       let(:config) { { ignored_events: [:endpoint_render] } }
       let(:app) { IgnoredEventAPI }
       let(:request_path) { '/success' }
-      let(:expected_span_name) { 'IgnoredEventAPI GET /success' }
+      let(:expected_span_name) { 'GET /success' }
 
       before { get request_path }
 

@@ -88,7 +88,7 @@ module OpenTelemetry
           end
 
           def span_name(endpoint)
-            "#{api_instance(endpoint)} #{request_method(endpoint)} #{path(endpoint)}"
+            "#{request_method(endpoint)} #{path(endpoint)}"
           end
 
           def run_attributes(payload)
@@ -97,7 +97,7 @@ module OpenTelemetry
             {
               'component' => 'web',
               'operation' => 'endpoint_run',
-              'grape.route.endpoint' => api_instance(endpoint),
+              'grape.route.endpoint' => endpoint.options[:for]&.base.to_s,
               'grape.route.path' => path,
               'grape.route.method' => endpoint.options[:method].first,
               OpenTelemetry::SemanticConventions::Trace::HTTP_METHOD => request_method(endpoint),
@@ -114,10 +114,6 @@ module OpenTelemetry
             return unless exception.respond_to?('status') && exception.status
 
             span.set_attribute(OpenTelemetry::SemanticConventions::Trace::HTTP_STATUS_CODE, exception.status)
-          end
-
-          def api_instance(endpoint)
-            endpoint.options[:for]&.base.to_s
           end
 
           def request_method(endpoint)
