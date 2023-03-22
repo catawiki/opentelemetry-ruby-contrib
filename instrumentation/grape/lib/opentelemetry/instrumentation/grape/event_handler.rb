@@ -27,7 +27,7 @@ module OpenTelemetry
             return unless span && token
 
             if payload[:exception_object]
-              handle_error(span, payload[:exception_object])
+              handle_payload_exception(span, payload[:exception_object])
             else
               span.set_attribute(OpenTelemetry::SemanticConventions::Trace::HTTP_STATUS_CODE, payload[:endpoint].status)
             end
@@ -44,7 +44,7 @@ module OpenTelemetry
               'operation' => 'endpoint_render'
             }
             tracer.in_span(name, attributes: attributes, start_timestamp: start, kind: :server) do |span|
-              handle_error(span, payload[:exception_object]) if payload[:exception_object]
+              handle_payload_exception(span, payload[:exception_object]) if payload[:exception_object]
             end
           end
 
@@ -63,7 +63,7 @@ module OpenTelemetry
               'grape.filter.type' => type.to_s
             }
             tracer.in_span(name, attributes: attributes, start_timestamp: start, kind: :server) do |span|
-              handle_error(span, payload[:exception_object]) if payload[:exception_object]
+              handle_payload_exception(span, payload[:exception_object]) if payload[:exception_object]
             end
           end
 
@@ -77,7 +77,7 @@ module OpenTelemetry
               'grape.formatter.type' => formatter_type(payload[:formatter])
             }
             tracer.in_span(name, attributes: attributes, start_timestamp: start, kind: :server) do |span|
-              handle_error(span, payload[:exception_object]) if payload[:exception_object]
+              handle_payload_exception(span, payload[:exception_object]) if payload[:exception_object]
             end
           end
 
@@ -105,7 +105,10 @@ module OpenTelemetry
             }
           end
 
-          def handle_error(span, exception)
+          # ActiveSupport::Notifications will attach a `:exception_object` to the payload if there was
+          # an error raised during the execution of the &block associated to the Notification.
+          # This can be safely added to the span for tracing.
+          def handle_payload_exception(span, exception)
             span.record_exception(exception)
             span.status = OpenTelemetry::Trace::Status.error("Unhandled exception of type: #{exception.class}")
             return unless exception.respond_to?('status') && exception.status
@@ -114,17 +117,17 @@ module OpenTelemetry
           end
 
           def api_instance(endpoint)
-            endpoint.options[:for].base.to_s
+            endpoint.options[:for]&.base.to_s
           end
 
           def request_method(endpoint)
-            endpoint.options.fetch(:method).first
+            endpoint.options[:method]&.first
           end
 
           def path(endpoint)
             namespace = endpoint.routes.first.namespace
             version = endpoint.routes.first.options[:version] || ''
-            prefix = endpoint.routes.first.options[:prefix].to_s || ''
+            prefix = endpoint.routes.first.options[:prefix]&.to_s || ''
             parts = [prefix, version] + namespace.split('/') + endpoint.options[:path]
             parts.reject { |p| p.blank? || p.eql?('/') }.join('/').prepend('/')
           end

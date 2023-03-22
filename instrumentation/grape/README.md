@@ -2,7 +2,7 @@
 
 The Grape instrumentation is a community-maintained instrumentation for [Grape](https://github.com/ruby-grape/grape), a REST-like API framework for Ruby.
 
-It relies mostly on the Grape built-in support for `ActiveSupport::Notifications` (more info [here](https://github.com/ruby-grape/grape#active-support-instrumentation)).
+It relies on the Grape built-in support for `ActiveSupport::Notifications` (more info [here](https://github.com/ruby-grape/grape#active-support-instrumentation)).
 
 It currently supports the following events:
 
@@ -31,7 +31,7 @@ OpenTelemetry::SDK.configure do |c|
 end
 ```
 
-Since Grape is "designed to run on Rack or complement existing web application frameworks such as Rails and Sinatra", we recommend using it along with the Rack, Rails and/or Sinatra instrumentations.
+Since Grape is "designed to run on Rack or complement existing web application frameworks such as Rails and Sinatra", it is recommended to use this instrumentation along with the Rack, Rails and/or Sinatra instrumentations.
 
 Alternatively, you can also call `use_all` to install all the available instrumentation.
 
@@ -47,7 +47,7 @@ end
 
 Indicate if any events should not produce spans.
 
-- Accepted values: `:endpoint_render`, `:endpoint_run_filters`.
+- Accepted values: `:endpoint_render`, `:endpoint_run_filters`, `:format_response`.
 - Defaults to `[]` (no ignored events).
 
 Example:
@@ -58,7 +58,7 @@ OpenTelemetry::SDK.configure do |c|
 end
 ```
 
-Note that the `endpoint_run` event cannot be disabled since it is the parent event. If you need to disable the instrumentation, set `:enabled` to `false`:
+Note that the `endpoint_run` event cannot be ignored. If you need to disable the instrumentation, set `:enabled` to `false`:
 
 ```ruby
 OpenTelemetry::SDK.configure do |c|

@@ -18,12 +18,18 @@ module OpenTelemetry
 
           private
 
+          # ActiveSupport::Notifications that can be subscribed to using the documented `.subscribe` interface.
+          #
+          # Reference: https://api.rubyonrails.org/classes/ActiveSupport/Notifications.html#method-c-subscribe
           SUBSCRIPTIONS = {
             endpoint_render: 'endpoint_render.grape',
             endpoint_run_filters: 'endpoint_run_filters.grape',
             format_response: 'format_response.grape'
           }.freeze
 
+          # ActiveSupport::Notifications to be subscribed to that implement the ActiveSupport::Subscriber interface.
+          #
+          # Reference: https://github.com/rails/rails/blob/05cb63abdaf6101e6c8fb43119e2c0d08e543c28/activesupport/lib/active_support/notifications/fanout.rb#L320-L322
           CUSTOM_SUBSCRIPTIONS = {
             endpoint_run: 'OpenTelemetry::Instrumentation::Grape::CustomSubscribers::EndpointRun'
           }.freeze
