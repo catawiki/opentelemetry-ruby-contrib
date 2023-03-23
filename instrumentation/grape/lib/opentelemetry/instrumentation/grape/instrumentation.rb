@@ -35,8 +35,6 @@ module OpenTelemetry
 
         def require_dependencies
           require_relative 'subscriber'
-          require_relative 'event_handler'
-          require_relative 'custom_subscribers/endpoint_run'
         end
 
         def subscribe

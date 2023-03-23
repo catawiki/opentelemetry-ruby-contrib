@@ -4,6 +4,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+require_relative 'custom_subscribers/endpoint_run'
+require_relative 'event_handler'
+
 module OpenTelemetry
   module Instrumentation
     module Grape
@@ -31,13 +34,12 @@ module OpenTelemetry
           #
           # Reference: https://github.com/rails/rails/blob/05cb63abdaf6101e6c8fb43119e2c0d08e543c28/activesupport/lib/active_support/notifications/fanout.rb#L320-L322
           CUSTOM_SUBSCRIPTIONS = {
-            endpoint_run: 'OpenTelemetry::Instrumentation::Grape::CustomSubscribers::EndpointRun'
+            endpoint_run: OpenTelemetry::Instrumentation::Grape::CustomSubscribers::EndpointRun
           }.freeze
 
           def subscribe_to_custom_notifications
             CUSTOM_SUBSCRIPTIONS.each do |event, klass|
-              custom_subscriber = Object.const_get(klass).new
-              ::ActiveSupport::Notifications.subscribe("#{event}.grape", custom_subscriber)
+              ::ActiveSupport::Notifications.subscribe("#{event}.grape", klass.new)
             end
           end
 
