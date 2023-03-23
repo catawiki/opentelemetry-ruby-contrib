@@ -26,11 +26,7 @@ module OpenTelemetry
             token = payload.delete(:__opentelemetry_ctx_token)
             return unless span && token
 
-            if payload[:exception_object]
-              handle_payload_exception(span, payload[:exception_object])
-            else
-              span.set_attribute(OpenTelemetry::SemanticConventions::Trace::HTTP_STATUS_CODE, payload[:endpoint].status)
-            end
+            handle_payload_exception(span, payload[:exception_object]) if payload[:exception_object]
 
             span.finish
             OpenTelemetry::Context.detach(token)
@@ -111,9 +107,6 @@ module OpenTelemetry
           def handle_payload_exception(span, exception)
             span.record_exception(exception)
             span.status = OpenTelemetry::Trace::Status.error("Unhandled exception of type: #{exception.class}")
-            return unless exception.respond_to?('status') && exception.status
-
-            span.set_attribute(OpenTelemetry::SemanticConventions::Trace::HTTP_STATUS_CODE, exception.status)
           end
 
           def request_method(endpoint)

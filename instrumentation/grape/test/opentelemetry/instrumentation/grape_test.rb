@@ -55,7 +55,6 @@ describe OpenTelemetry::Instrumentation::Grape do
         _(span.attributes['http.route']).must_equal '/hello'
         _(span.attributes['grape.route.method']).must_equal 'GET'
         _(span.attributes['http.method']).must_equal 'GET'
-        _(span.attributes['http.status_code']).must_equal 200
       end
 
       it 'produces a child endpoint_render span with the expected attributes' do
@@ -258,7 +257,6 @@ describe OpenTelemetry::Instrumentation::Grape do
           _(span.events.first.name).must_equal 'exception'
           _(span.events.first.attributes['exception.type']).must_equal expected_error_type
           _(span.events.first.attributes['exception.message']).must_equal 'name is missing'
-          _(span.attributes['http.status_code']).must_equal(400)
         end
       end
 
@@ -307,12 +305,6 @@ describe OpenTelemetry::Instrumentation::Grape do
           _(span.name).must_equal expected_span_name
           _(span.status.code).wont_equal OpenTelemetry::Trace::Status::ERROR
         end
-      end
-
-      it 'does not add the http.status_code attribute to the endpoint_run span' do
-        span = run_spans.first
-
-        _(span.attributes).wont_include 'http.status_code'
       end
     end
 
@@ -421,12 +413,6 @@ describe OpenTelemetry::Instrumentation::Grape do
           _(span.name).must_equal expected_span_name
           _(span.status.code).wont_equal OpenTelemetry::Trace::Status::ERROR
         end
-      end
-
-      it 'sets endpoint_run span status code to expected value' do
-        span = run_spans.first
-
-        _(span.attributes['http.status_code']).must_equal 404
       end
     end
 
